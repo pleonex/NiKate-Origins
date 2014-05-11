@@ -67,6 +67,10 @@ public abstract class Mensaje {
                     msg = new Actualizacion(numSec, inStream);
                     break;
                     
+                case CONFIRMACION:
+                    msg = new Confirmacion(numSec, inStream);
+                    break;
+                    
                 default:
                     throw new MessageFormatException(tipo, "");
             }

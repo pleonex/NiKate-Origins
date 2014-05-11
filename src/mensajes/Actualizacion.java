@@ -64,6 +64,26 @@ public class Actualizacion extends Mensaje {
             System.out.println("ERROR " + ex.getMessage());
         }
     }
+
+    public short getUserId() {
+        return userId;
+    }
+
+    public byte getClase() {
+        return clase;
+    }
+
+    public byte getExperiencia() {
+        return experiencia;
+    }
+
+    public byte getSalud() {
+        return salud;
+    }
+
+    public byte getVida() {
+        return vida;
+    }
     
     @Override
     protected void writeData(OutputStream outStream) {

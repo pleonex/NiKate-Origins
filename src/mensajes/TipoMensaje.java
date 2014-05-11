@@ -17,8 +17,6 @@
 
 package mensajes;
 
-import java.io.InputStream;
-
 /**
  * Identifica el tipo de mensaje.
  * 
