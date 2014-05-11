@@ -32,8 +32,9 @@ public class RegistroCorrecto extends Mensaje {
     private short mapaId;
     private byte numPersonajes;
     
-    public RegistroCorrecto(final short mapaId, final byte numPersonajes) {
-        super(TipoMensaje.REGISTRO_CORRECTO);
+    public RegistroCorrecto(final short numSec, final short mapaId,
+            final byte numPersonajes) {
+        super(TipoMensaje.REGISTRO_CORRECTO, numSec);
         
         this.mapaId = mapaId;
         this.numPersonajes = numPersonajes;

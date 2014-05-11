@@ -32,8 +32,9 @@ public class RegistroSolicitud extends Mensaje {
     private short usuarioId;
     private short usuarioPasswd;
     
-    public RegistroSolicitud(final short usuarioId, final short usuarioPasswd) {
-        super(TipoMensaje.REGISTRO_SOLICITUD);
+    public RegistroSolicitud(final short numSec, final short usuarioId,
+            final short usuarioPasswd) {
+        super(TipoMensaje.REGISTRO_SOLICITUD, numSec);
         
         this.usuarioId     = usuarioId;
         this.usuarioPasswd = usuarioPasswd;

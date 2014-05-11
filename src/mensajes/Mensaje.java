@@ -30,23 +30,12 @@ import java.io.OutputStream;
  * @author  Benito Palacios Sánchez
  */
 public abstract class Mensaje {
-    private static short MaxNumSec = 0;
-    
     private final TipoMensaje tipo;
     private final short numSec;
-    
-    public Mensaje(final TipoMensaje tipo) {
-        this.tipo   = tipo;
-        this.numSec = MaxNumSec++;
-    }
     
     public Mensaje(final TipoMensaje tipo, final short numSec) {
         this.tipo   = tipo;
         this.numSec = numSec;
-        
-        // Aumenta el número de secuencia para futuras asignaciones
-        if (numSec >= MaxNumSec)
-            MaxNumSec = (short)(numSec + 1);
     }
     
     public static Mensaje FromStream(final InputStream inStream) 
@@ -66,6 +55,10 @@ public abstract class Mensaje {
                     msg = new RegistroSolicitud(numSec, inStream);
                     break;
 
+                case REGISTRO_CORRECTO:
+                    msg = new RegistroCorrecto(numSec, inStream);
+                    break;
+                    
                 default:
                     throw new MessageFormatException(tipo, "");
             }
