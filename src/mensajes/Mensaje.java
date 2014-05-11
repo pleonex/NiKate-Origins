@@ -59,6 +59,14 @@ public abstract class Mensaje {
                     msg = new RegistroCorrecto(numSec, inStream);
                     break;
                     
+                case REGISTRO_INCORRECTO:
+                    msg = new RegistroIncorrecto(numSec, inStream);
+                    break;
+                    
+                case ACTUALIZACION:
+                    msg = new Actualizacion(numSec, inStream);
+                    break;
+                    
                 default:
                     throw new MessageFormatException(tipo, "");
             }
