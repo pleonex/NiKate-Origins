@@ -35,10 +35,12 @@ public class Actualizacion extends Mensaje {
     private byte experiencia;
     private byte salud;
     private byte vida;
+    private short posicion;
+    private short tiempo;
     
     public Actualizacion(final short numSec, final short userId,
             final byte clase, final byte experiencia, final byte salud,
-            final byte vida) {
+            final byte vida, final short posicion, final short tiempo) {
         super(TipoMensaje.ACTUALIZACION, numSec);
         
         this.userId = userId;
@@ -46,6 +48,8 @@ public class Actualizacion extends Mensaje {
         this.experiencia = experiencia;
         this.salud = salud;
         this.vida  = vida;
+        this.posicion = posicion;
+        this.tiempo   = tiempo;
     }
     
     public Actualizacion(final short numSec, final InputStream inStream) {
@@ -60,6 +64,9 @@ public class Actualizacion extends Mensaje {
             this.experiencia = (byte)((estado >> 0x08) & 0x0F);
             this.salud       = (byte)((estado >> 0x04) & 0x0F);
             this.vida        = (byte)((estado >> 0x00) & 0x0F);
+            
+            this.posicion = reader.readShort();
+            this.tiempo   = reader.readShort();
         } catch (IOException ex) {
             System.out.println("ERROR " + ex.getMessage());
         }
@@ -85,6 +92,14 @@ public class Actualizacion extends Mensaje {
         return vida;
     }
     
+    public short getPosicion() {
+        return posicion;
+    }
+    
+    public short getTiempo() {
+        return tiempo;
+    }
+    
     @Override
     protected void writeData(OutputStream outStream) {
         DataOutputStream writer = new DataOutputStream(outStream);
@@ -96,7 +111,10 @@ public class Actualizacion extends Mensaje {
             estado |= (this.experiencia & 0x0F) << 0x08;
             estado |= (this.salud       & 0x0F) << 0x04;
             estado |= (this.vida        & 0x0F) << 0x00;
+            
             writer.writeShort(estado);
+            writer.writeShort(this.posicion);
+            writer.writeShort(this.tiempo);
         } catch (IOException ex) {
             System.out.println("ERROR " + ex.getMessage());
         }
