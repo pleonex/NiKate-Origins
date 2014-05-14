@@ -25,18 +25,31 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * Representa el mensaje de tipo CONFIRMACION.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class Confirmacion extends Mensaje {
     private short msgHash;
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de sus parámetros.
+     * 
+     * @param numSec Número de secuencia.
+     * @param msgHash Hash (CRC16) del mensaje de actualización.
+     */
     public Confirmacion(final short numSec, final short msgHash) {
         super(TipoMensaje.CONFIRMACION, numSec);
         
         this.msgHash = msgHash;
     }
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de un flujo de entrada.
+     * 
+     * @param numSec Número de secuencia.
+     * @param inStream Flujo de entrada.
+     */
     public Confirmacion(final short numSec, final InputStream inStream) {
         super(TipoMensaje.CONFIRMACION, numSec);
         
@@ -48,6 +61,11 @@ public class Confirmacion extends Mensaje {
         }
     }
 
+    /**
+     * Obtiene el hash (CRC16) del mensaje de actualización correspondiente.
+     * 
+     * @return Hash del mensaje de actualización.
+     */
     public short getMsgHash() {
         return msgHash;
     }

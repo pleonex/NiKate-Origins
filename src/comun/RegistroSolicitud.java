@@ -25,13 +25,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * Representa un mensaje de tipo REGISTRO_SOLICITUD.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class RegistroSolicitud extends Mensaje {
     private short usuarioId;
     private short usuarioPasswd;
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de sus parámetros.
+     * 
+     * @param numSec Número de secuencia.
+     * @param usuarioId ID del usuario.
+     * @param usuarioPasswd Hash (CRC16) de la contraseña.
+     */
     public RegistroSolicitud(final short numSec, final short usuarioId,
             final short usuarioPasswd) {
         super(TipoMensaje.REGISTRO_SOLICITUD, numSec);
@@ -40,6 +48,12 @@ public class RegistroSolicitud extends Mensaje {
         this.usuarioPasswd = usuarioPasswd;
     }
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de un flujo de entrada.
+     * 
+     * @param numSec Número de secuencia.
+     * @param inStream Flujo de entrada.
+     */
     public RegistroSolicitud(final short numSec, final InputStream inStream) {
         super(TipoMensaje.REGISTRO_SOLICITUD, numSec);
         
@@ -52,10 +66,20 @@ public class RegistroSolicitud extends Mensaje {
         }
     }
     
+    /**
+     * Obtiene el ID del usuario.
+     * 
+     * @return ID del usuario.
+     */
     public short getUsuarioId() {
         return this.usuarioId;
     }
     
+    /**
+     * Obtiene el CRC16 de la contraseña del usuario.
+     * 
+     * @return CRC16 de la contraseña del usuario.
+     */
     public short getUsuarioPassword() {
         return this.usuarioPasswd;
     }

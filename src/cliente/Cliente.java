@@ -31,51 +31,89 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 /**
- *
+ * Cliente del videojuego.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class Cliente {
-
+    // Variables de socket
     private final DatagramSocket socket;
     private final SocketAddress addr;
 
+    // Hebra donde se esperará continuamente nuevos paquetes.
     private Thread mainThread;
+    
+    // Cola para implementar el defaultListener, se irán acumulando los mensajes
+    // recibidos.
     private final Queue<Mensaje> msgRecibidos = new ArrayDeque<>();
+    
+    // Se ejecutará al recibir mensajes de todo tipo excepto ACTUALIZACION. 
     private MensajeListener defaultListener;
+    
+    // Se ejecutará al recibir mensajes de tipo ACTUALIZACION.
+    // Si el método es null se ejecutará el defaultListener.
     private MensajeListener updateListener;
 
-    public Cliente(DatagramSocket socket, SocketAddress addr) {
+    /**
+     * Crea una nueva instancia con el socket a usar.
+     * 
+     * @param socket Socket UDP para comunicación con servidor.
+     * @param addr Dirección del servidor.
+     */
+    public Cliente(final DatagramSocket socket, final SocketAddress addr) {
         this.socket = socket;
-        this.addr = addr;
+        this.addr   = addr;
         this.defaultListener = new DefaultListenerImpl();
     }
 
-    public void setDefaultListener(MensajeListener value) {
+    /**
+     * Establece el listener por defecto para todos los mensajes.
+     * En caso de que el listener de actualización sea null, también se recibirán
+     * esos mensajes aquí.
+     * 
+     * @param value Nuevo listener.
+     */
+    public void setDefaultListener(final MensajeListener value) {
         this.defaultListener = value;
     }
 
-    public void setUpdateListener(MensajeListener value) {
+    /**
+     * Establece el listener para los mensajes de actualización.
+     * En caso de ser null, se enviará hacia el defaultListener.
+     * 
+     * @param value Nuevo listener.
+     */
+    public void setUpdateListener(final MensajeListener value) {
         this.updateListener = value;
     }
 
+    /**
+     * Interrumpe la hebra que recibe mensajes del servidor.     * 
+     */
     public void parar() {
         if (this.mainThread != null && this.mainThread.isAlive()) {
             this.mainThread.interrupt();
         }
     }
 
+    /**
+     * Comienza la hebra para recibir mensajes del servidor.     * 
+     */
     public void comenzar() {
         this.mainThread = new Thread() {
             @Override
             public void run() {
-                while (!socket.isClosed()) {
+                // Obtiene el siguiente mensaje de manera indefinida.
+                while (!socket.isClosed())
                     siguienteMensaje();
-                }
             }
         };
         this.mainThread.start();
     }
 
+    /**
+     * Recibe un mensaje del servidor.     * 
+     */
     private void siguienteMensaje() {
         // Primero recibe el paquete
         byte[] buffer = new byte[Mensaje.GetMaxMsgSize()];
@@ -87,11 +125,10 @@ public class Cliente {
         }
 
         // Comprueba que sea para nosotros
-        if (!paquete.getSocketAddress().equals(this.addr)) {
+        if (!paquete.getSocketAddress().equals(this.addr))
             return;
-        }
 
-        // Obtiene el mensaje
+        // Obtiene el mensaje asociado a esos datos.
         Mensaje mensaje = null;
         try {
             ByteArrayInputStream inStream = new ByteArrayInputStream(paquete.getData());
@@ -101,9 +138,9 @@ public class Cliente {
             System.err.println(ex.getMessage());
         }
 
-        if (mensaje == null) {
+        // Comprueba que no haya habido errores.
+        if (mensaje == null)
             return;
-        }
 
         // Finalmente lo envía al listener adecuado
         switch (mensaje.getTipo()) {
@@ -114,36 +151,52 @@ public class Cliente {
                 this.defaultListener.mensajeRecibido(mensaje);
                 break;
 
+            // Respuesta de actualización.
             case ACTUALIZACION:
-                if (this.updateListener != null) {
+                if (this.updateListener != null)
                     this.updateListener.mensajeRecibido(mensaje);
-                } else {
+                else
                     this.defaultListener.mensajeRecibido(mensaje);
-                }
                 break;
         }
     }
 
-    public void envia(Mensaje mensaje) {
+    /**
+     * Envía un mensaje hacia el servidor.
+     * 
+     * @param mensaje Mensaje a enviar.
+     */
+    public void envia(final Mensaje mensaje) {
         try {
+            // Lo convierte a un vector de bytes.
             byte[] data = mensaje.write();
+            
+            // Crea el paquete con la dirección del servidor.
             DatagramPacket paquete = new DatagramPacket(
                     data,
                     data.length,
                     this.addr
             );
+            
+            // Lo envía por el socket.
             this.socket.send(paquete);
         } catch (IOException ex) {
             System.err.println("ERROR: " + ex.getMessage());
         }
     }
 
+    /**
+     * Bloquea la ejecución del programa hasta que se recibe un mensaje del
+     * listener por defecto.
+     *  
+     * @return Mensaje recibido o null si ha habido error.
+     */
     public Mensaje recibeBloqueante() {
         try {
-            // Aunque no es lo mejor, para pequeños mensajes al servidor está bien
-            while (msgRecibidos.isEmpty()) {
+            // Esta no es la mejor forma de hacerlo... habría que usar sólo
+            // los listener, pero en algunos sitios simplifica la implementación.
+            while (msgRecibidos.isEmpty())
                 Thread.sleep(100);
-            }
             
             return msgRecibidos.poll();
         } catch (InterruptedException ex) {
@@ -152,6 +205,13 @@ public class Cliente {
         return null;
     }
 
+    /**
+     * Inicia sesión en el servidor enviando un mensaje de REGISTRO_SOLICITUD.
+     * 
+     * @param userId ID del usuario.
+     * @param password Contraseña en texto plano.
+     * @return Mapa asignado por el servidor o -1 si no ha sido con éxito.
+     */
     public short iniciaSesion(String userId, String password) {
         short hexId = Short.parseShort(userId, 16);
         short hashPass = Crc16.calculate(password.getBytes());
@@ -174,6 +234,10 @@ public class Cliente {
             return -1;
     }
     
+    /**
+     * Implementación básica del listener por defecto.
+     * Guarda los mensajes recibidos en una cola.
+     */
     private class DefaultListenerImpl implements MensajeListener {
 
         @Override

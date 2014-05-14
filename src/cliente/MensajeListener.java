@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Benito Palacios Sánchez, Álvaro Artigas Gil
+ * Copyright (C) 2014 Benito Palacios Sánchez
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,8 +20,9 @@ package cliente;
 import comun.Mensaje;
 
 /**
- *
- * @author Benito Palacios Sánchez, Álvaro Artigas Gil
+ * Interfaz para implementar un método que se ejecuta cuando se recibe un mensaje.
+ * 
+ * @author Benito Palacios Sánchez
  */
 public interface MensajeListener {
     abstract void mensajeRecibido(Mensaje mensaje);

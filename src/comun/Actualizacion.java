@@ -25,7 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * Representa un mensaje de tipo ACTUALIZACION.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class Actualizacion extends Mensaje {
@@ -38,6 +39,18 @@ public class Actualizacion extends Mensaje {
     private short posicion;
     private short tiempo;
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de sus parámetros.
+     * 
+     * @param numSec Número de secuencia.
+     * @param userId ID del usuario.
+     * @param clase Tipo / Clase del personaje.
+     * @param experiencia Nivel de experiencia del personaje.
+     * @param salud Nivel de salud del personaje.
+     * @param vida Nivel de vida del personaje.
+     * @param posicion Posición del personaje.
+     * @param tiempo Tiempo del servidor.
+     */
     public Actualizacion(final short numSec, final short userId,
             final byte clase, final byte experiencia, final byte salud,
             final byte vida, final short posicion, final short tiempo) {
@@ -52,6 +65,12 @@ public class Actualizacion extends Mensaje {
         this.tiempo   = tiempo;
     }
     
+    /**
+     * Crea una nueva instancia del mensaje a partir de un flujo de entrada.
+     * 
+     * @param numSec Número de secuencia del mensaje.
+     * @param inStream Flujo de entrada.
+     */
     public Actualizacion(final short numSec, final InputStream inStream) {
         super(TipoMensaje.ACTUALIZACION, numSec);
         
@@ -72,36 +91,74 @@ public class Actualizacion extends Mensaje {
         }
     }
 
+    /**
+     * Devuelve el ID del usuario.
+     * 
+     * @return ID del usuario.
+     */
     public short getUserId() {
         return userId;
     }
 
+    /**
+     * Devuelve la clase del personaje.
+     * 
+     * @return CLase del personaje.
+     */
     public byte getClase() {
         return clase;
     }
 
+    /**
+     * Devuelve la experiencia del personaje.
+     * 
+     * @return Experiencia del personaje.
+     */
     public byte getExperiencia() {
         return experiencia;
     }
 
+    /**
+     * Devuelve el nivel de salud del personaje.
+     * 
+     * @return Nivel de salud.
+     */
     public byte getSalud() {
         return salud;
     }
 
+    /**
+     * Devuelve el nivel de vida del personaje.
+     * 
+     * @return Nivel de vida.
+     */
     public byte getVida() {
         return vida;
     }
     
+    /**
+     * Devuelve la posición del personaje.
+     * 
+     * @return Posición del personaje.
+     */
     public short getPosicion() {
         return posicion;
     }
     
+    /**
+     * Devuelve el tiempo del servidor en el que se envió el mensaje.
+     * Esto no está correctamente implementado. En su lugar se envía
+     * el tiempo que ha transcurrido desde que se envió el primer mensaje
+     * de actualización y el actual.
+     * 
+     * @return Tiempo del servidor.
+     */
     public short getTiempo() {
         return tiempo;
     }
     
     @Override
-    protected void writeData(OutputStream outStream) {
+    protected void writeData(final OutputStream outStream) {
         DataOutputStream writer = new DataOutputStream(outStream);
         try {
             writer.writeShort(this.userId);

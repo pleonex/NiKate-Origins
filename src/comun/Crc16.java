@@ -17,6 +17,9 @@
 
 package comun;
 
+/**
+ * Clase para realizar cálculos del código de comprobación CRC16.
+ */
 public class Crc16 { 
     private static final int[] Table = {
             0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -53,6 +56,12 @@ public class Crc16 {
             0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040,
     };
     
+    /**
+     * Calcula el CRC16 del vector de array dado.
+     * 
+     * @param data Datos para calcular el CRC16
+     * @return CRC16 de los datos.
+     */
     public static short calculate(final byte[] data) {
         int crc = 0x0000;
         for (byte b : data)

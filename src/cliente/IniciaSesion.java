@@ -216,7 +216,7 @@ public class IniciaSesion extends javax.swing.JFrame {
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        Audio.stopAll();
+        //Audio.stopAll();
     }//GEN-LAST:event_formWindowClosing
 
     /**

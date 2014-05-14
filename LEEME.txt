@@ -64,6 +64,13 @@ Atacar
  
 |-> Requisitos y ejecución
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+En cuanto se inicia la pantalla del
+juego hay que hacer click con el ratón
+sobre el escenario para poder mover al
+personaje. Esto es para que el foco
+se centre en el componente del
+escenario.
+
 El juego necesita tener la carpeta
 "res" con los archivos de gráficos y
 audio del juego. Esta carpeta no está
@@ -90,6 +97,9 @@ Para ejecutar el cliente se puede hacer
 directamente desde el archivo .jar como
 sigue:
 java -jar NiKate_-_Origins.jar
+Ello ejecutará el método main de la
+clase InicioSesion por la parte del
+cliente.
 
 Para ejecutar el servidor se habrá de
 ejecutar la clase como sigue:

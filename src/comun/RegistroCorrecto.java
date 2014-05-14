@@ -25,13 +25,21 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * Representa un mensaje de tipo REGISTRO_CORRECTO.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class RegistroCorrecto extends Mensaje {
     private short mapaId;
     private byte numPersonajes;
     
+    /**
+     * Crea una nueva instancia.
+     * 
+     * @param numSec Número de secuencia.
+     * @param mapaId ID del mapa.
+     * @param numPersonajes Número de personajes en el mapa.
+     */
     public RegistroCorrecto(final short numSec, final short mapaId,
             final byte numPersonajes) {
         super(TipoMensaje.REGISTRO_CORRECTO, numSec);
@@ -40,9 +48,16 @@ public class RegistroCorrecto extends Mensaje {
         this.numPersonajes = numPersonajes;
     }
     
+    /**
+     * Crea una nueva instancia.
+     * 
+     * @param numSec Número de secuencia.
+     * @param inStream Flujo de datos de entrada.
+     */
     public RegistroCorrecto(final short numSec, final InputStream inStream) {
         super(TipoMensaje.REGISTRO_CORRECTO, numSec);
         
+        // Lee los datos.
         try {
             DataInputStream reader = new DataInputStream(inStream);
             this.mapaId = reader.readShort();
@@ -52,16 +67,26 @@ public class RegistroCorrecto extends Mensaje {
         }
     }
 
+    /**
+     * Obtiene el ID del mapa.
+     * 
+     * @return ID del mapa.
+     */
     public short getMapaId() {
         return mapaId;
     }
 
+    /**
+     * Obtiene el número de personajes.
+     * 
+     * @return Número de personajes.
+     */
     public byte getNumPersonajes() {
         return numPersonajes;
     }
         
     @Override
-    protected void writeData(OutputStream outStream) {
+    protected void writeData(final OutputStream outStream) {
         DataOutputStream writer = new DataOutputStream(outStream);
         
         try {

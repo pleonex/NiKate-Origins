@@ -39,7 +39,13 @@ public enum TipoMensaje {
         this.id = (byte)id;
     }
     
-    public static TipoMensaje fromId(int id) {
+    /**
+     * Crea una nueva instancia de tipo a partir de su identificador.
+     * 
+     * @param id Identificador del mensaje.
+     * @return Tipo del mensaje asociado o DESCONICIDO si no encontrado.
+     */
+    public static TipoMensaje fromId(final int id) {
         TipoMensaje tipo = TipoMensaje.DESCONOCIDO;
         
         for (TipoMensaje valor : TipoMensaje.values())
@@ -49,6 +55,11 @@ public enum TipoMensaje {
         return tipo;
     }
     
+    /**
+     * Obtiene el ID asociado a este tipo.
+     * 
+     * @return ID asociado.
+     */
     public byte getId() {
             return this.id;
     }

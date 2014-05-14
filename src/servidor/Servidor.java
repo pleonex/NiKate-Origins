@@ -36,14 +36,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
+ * Clase principal del servidor.
  *
  * @verion 1.0
  * @author Benito Palacios Sánchez
  */
 public class Servidor {    
     /**
-     * @param args Argumentos pasados por la línea de comandos
+     * Inicia el servidor.
+     * 
+     * @param args Sólo se necesita un argumento, el número del puerto.
      */
     public static void main(String[] args) {
         if (args.length != 1) {
@@ -52,28 +54,42 @@ public class Servidor {
             System.out.println("USO: Servidor puerto");
             return;
         }
-
+        
         int puerto = Integer.parseInt(args[0]);
         System.out.println("Iniciando servicio en puerto " + puerto);
         iniciarServicio(puerto);
     }
 
+    /**
+     * Inicia el servidor.
+     * Crea un socket UDP y comienza a recibir peticiones.
+     * 
+     * @param puerto 
+     */
     private static void iniciarServicio(final int puerto) {
-        // Diccionario para controlar de quién es cada paquete
+        // Diccionario para controlar de quién es cada paquete.
+        // Este método se encargar de añadirlos cuando se crea un servicio.
         Map<SocketAddress, Servicio> addrServicio = new HashMap<>();
         
         // Diccionario para que los servicios se encuentren entre sí.
+        // Los servicios se añaden ellos sólo y se borran de la lista
+        // cuando un jugador se loguea y cuando pierde.
         Map<Short, List<Servicio>> mapServicio = new HashMap<>();
         
         try {
+            // Crea un socket UDP y comienza a escuchar en el puerto indicado
             DatagramSocket socket = new DatagramSocket(puerto);
 
+            // Recibe y procesa paquetes de forma indefinida.
             while (true) {
-                // Recibo un nuevo paquete
+                // Recibo un nuevo paquete.
+                // Para ello creo un buffer del tamaño máximo que se podrían
+                // recibir datos y lo mando para que lo rellene.
                 byte[] buffer = new byte[Mensaje.GetMaxMsgSize()];
                 DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
                 socket.receive(paquete);
 
+                // Proceso el paquete.
                 // Compruebo si el servicio al que le corresponde esta dirección
                 // existía de antes o no. En ese caso lo creo
                 SocketAddress addr = paquete.getSocketAddress();
@@ -83,6 +99,7 @@ public class Servidor {
                 }
                  
                 // Le envío el paquete al servicio
+                // Él se encargará de convertir a mensaje y procesarlo.
                 addrServicio.get(addr).recibe(paquete);
             }
 
@@ -91,42 +108,90 @@ public class Servidor {
         }
     }
 
+    /**
+     * Clase interna con la funcionalidad del servidor.
+     * Esta clase se encarga de recibir paquetes y procesarlos.
+     * Se crea una instancia de la clase por cada cliente.
+     */
     private static class Servicio {
-
+        // Variables de los sockets
         private final DatagramSocket socket;
         private final SocketAddress address;
         
+        // Lista de servicios activos clasificados por el mapa en el que actúan.
         private final Map<Short, List<Servicio>> servicios;
+        
+        // Diccionario de métodos para procesar los mensajes recibidos.
         private final Map<TipoMensaje, ProcesaAccion> accciones = creaAcciones();
+        
+        // Diccionario con los usuarios y contraseñas (CRC16) admitidos.
         private final Map<Short, Short> usuariosPermitidos = creaUsuarios();
         
+        // Número máximo de usuarios por mapa
         private final static short MaxUsers = 8;
+        
+        // Variables que identifican al usuario
         private short userId = -1;
         private short mapaId = -1;
+        
+        // Guarda el último mensaje de actualización recibido para que cuando
+        // otro cliente se conecte al juego puede ser retransmitido y se pueda
+        // conocer la posición de este usuario.
         private Actualizacion lastUpdate;
+        
+        // Indica si se ha recibido o no un mensaje de actualización todavía.
+        // En el primer mensaje de actualización se pedirá a los otros jugadores
+        // que retransmitan su último mensaje de actualización para saber su
+        // posición.
         private boolean primeraActual = true;
 
+        /**
+         * Crea una nueva instancia del servicio.
+         * 
+         * @param socket Socket UDP para comunicación
+         * @param address Dirección del cliente.
+         * @param servicios Diccionario con lista de servicios actuales por mapa.
+         */
         public Servicio(final DatagramSocket socket, final SocketAddress address, 
                 final Map<Short, List<Servicio>> servicios) {
             this.socket  = socket;
             this.address = address;
             this.servicios = servicios;
         }
-
+        
+        /**
+         * Obtiene el último mensaje de actualización.
+         * 
+         * @return Mensaje de actualización.
+         */
         public Actualizacion getUltimaActual() {
             return this.lastUpdate;
         }
         
+        /**
+         * Obtiene el ID del usuario.
+         * Este valor será -1 cuando todavía no se haya registrado.
+         * 
+         * @return ID del usuario.
+         */
         public short getUserId() {
             return this.userId;
         }
         
+        /**
+         * Recibe un paquete y lo procesa.
+         * Este método se encargará de convertirlo a mensaje correspondiente
+         * y llamar a un método para que lo procese.
+         * 
+         * @param paquete Paquete recibido del cliente.
+         */
         public void recibe(final DatagramPacket paquete) {
             // Nunca viene mal recomprobarlo...
             if (!paquete.getSocketAddress().equals(this.address))
                 return;
 
             // Obtiene una petición del cliente.
+            // Obtiene el mensaje contenido en los datos.
             Mensaje mensaje = null;
             try {
                 ByteArrayInputStream inStream = new ByteArrayInputStream(paquete.getData());
@@ -136,30 +201,52 @@ public class Servidor {
                 System.err.println(ex.getMessage());
             }
 
-            // Si no ha habido fallo
+            // Si no ha habido errores, procesamos el mensaje.
             if (mensaje != null)
                 this.procesaMensaje(mensaje);
         }
 
-        public void enviaActualizacion(Actualizacion mensaje) {
+        /**
+         * Envía un mensaje de actualización al cliente.
+         * Este método está expuesto al público para que otros Servicios
+         * puedan enviar sus mensajes de actualización a nuestro cliente.
+         * 
+         * @param mensaje Mensaje de actualización.
+         */
+        public void enviaActualizacion(final Actualizacion mensaje) {
             this.envia(mensaje);
         }
         
-        private void envia(Mensaje mensaje) {
+        /**
+         * Envía un mensaje por el socket UDP.
+         * 
+         * @param mensaje Mensaje a enviar.
+         */
+        private void envia(final Mensaje mensaje) {
             try {
+                // Obtiene los datos del mensaje
                 byte[] data = mensaje.write();
+                
+                // Crea el paquete añadiéndole la dirección del cliente.
                 DatagramPacket paquete = new DatagramPacket(
                         data,
                         data.length,
                         this.address
                 );
+                
+                // Lo envía.
                 this.socket.send(paquete);
             } catch (IOException ex) {
                 System.err.println("ERROR: " + ex.getMessage());
             }            
         }
         
-        private void procesaMensaje(Mensaje mensaje) {
+        /**
+         * Procesa el mensaje.
+         * 
+         * @param mensaje Mensaje a procesar.
+         */
+        private void procesaMensaje(final Mensaje mensaje) {
             // DEBUG INFO
             if (this.userId != -1)
                 System.out.printf("[%x][%s]\n", this.userId, mensaje.getTipo().name());
@@ -172,17 +259,33 @@ public class Servidor {
             }
         }
 
+        /**
+         * Crea el diccionario con los usuarios y contraseñas.
+         * Esto sería mejor leerlo desde un fichero externo, en lugar de
+         * tener los usuarios hardcoded.
+         * 
+         * @return 
+         */
         private Map<Short, Short> creaUsuarios() {
             Map<Short, Short> usuarios = new HashMap<>();
             usuarios.put((short)0x1F1F, (short)0x2EFE); // PASSWD: patatas
-            //usuarios.put((short)0x3636, (short)0xBDC1); // PASSWD: password
             return usuarios;
         }
 
+        /**
+         * Interfaz para métodos que implementar la acción de procesar un mensaje.
+         * De esta forma se puede tener como una lista de métodos para cada
+         * tipo de mensaje.
+         */
         private interface ProcesaAccion {
             void procesa(Mensaje mensaje);
         }
 
+        /**
+         * Crea el diccionario con los métodos que procesan los mensajes.
+         * 
+         * @return Diccionario con métodos para procesar mensaje según el tipo.
+         */
         private Map<TipoMensaje, ProcesaAccion> creaAcciones() {
             Map<TipoMensaje, ProcesaAccion> acciones = new HashMap<>();
 
@@ -211,19 +314,27 @@ public class Servidor {
             return acciones;
         }
 
-        private void procesaSolicitudRegistro(RegistroSolicitud mensaje) {
-            short usId = mensaje.getUsuarioId();
+        /**
+         * Procesa un mensaje de solicitud de registro en el servicio.
+         * 
+         * @param mensaje Mensaje de solicitud de registro.
+         */
+        private void procesaSolicitudRegistro(final RegistroSolicitud mensaje) {
+            short usId   = mensaje.getUsuarioId();
             short passwd = mensaje.getUsuarioPassword();
-            
             System.out.printf("Registro: 0x%X 0x%X\n", usId, passwd);
                         
             Mensaje respuesta;
-            if (false) {
+            if (false) {    // He desactivado la comprobación de usuario.
             //if (this.usuariosPermitidos.get(usId) != passwd) {
                 respuesta = new RegistroIncorrecto(mensaje.getNumSecuencia());
             } else {
+                // En caso de realizar la comprobación con éxito...
+                // actualizo las variables de identificación, asigando un mapa.
                 this.userId = usId;
-                this.mapaId = this.setMapId(usId);
+                this.mapaId = this.setMapId(usId); 
+                
+                // Envía mensaje de éxito.
                 respuesta = new RegistroCorrecto(
                         mensaje.getNumSecuencia(),
                         mapaId,
@@ -234,23 +345,40 @@ public class Servidor {
             this.envia(respuesta);
         }
 
-        private short setMapId(short usId) {
+        /**
+         * Establece el mapa en el que este jugador estará.
+         * 
+         * @param usId
+         * @return 
+         */
+        private short setMapId(final short usId) {
             short mapId = -1;
             
+            // Por cada mapa comprueba el número de jugadores y que este ID
+            // no esté siendo usado en ese mapa.
             for (short key : this.servicios.keySet())
                 if (this.servicios.get(key).size() < MaxUsers && !checkSpoofing(key, usId))
                     mapId = key;
             
+            // Si no hay mapas libres, creamos uno nuevo.
             if (mapId == -1) {
                 mapId = (short)this.servicios.size();
                 this.servicios.put(mapId, new ArrayList<Servicio>());
             }
             
+            // Nos registramos como servicio en dicho mapa.
             this.servicios.get(mapId).add(this);
             return mapId;
         }
         
-        private boolean checkSpoofing(short key, short usId) {
+        /**
+         * Comprueba que no hay ningún usuario con el mismo ID en un mapa.
+         * 
+         * @param key ID del mapa
+         * @param usId ID del usuario.
+         * @return Verdadero si hay un jugador con el mismo ID, otra cosa falso.
+         */
+        private boolean checkSpoofing(final short key, final short usId) {
             boolean spoofing = false;
             for (Servicio serv : servicios.get(key))
                 if (serv != this && serv.getUserId() == usId)
@@ -259,14 +387,20 @@ public class Servidor {
             return spoofing;
         }
         
-        private void procesaActualizacion(Actualizacion mensaje) {
+        /**
+         * Procesa el mensaje de actualización.
+         * 
+         * @param mensaje Mensaje de actualización.
+         */
+        private void procesaActualizacion(final Actualizacion mensaje) {
             // Pero si no te has autenticado -.-'
             if (this.userId == -1)
                 return;
             
             // TODO: Antes de enviar si no es de la misma ID comprobar
-            // que se ha podido atacar porque estaba cerca.
+            // que se ha podido atacar porque estaba cerca. Un anticheater.
                 
+            // Guarda este mensaje como el último recibido por el usuario.
             if (this.userId == mensaje.getUserId())
                 this.lastUpdate = mensaje;
             

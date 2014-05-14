@@ -19,19 +19,20 @@
 package comun;
 
 /**
- *
+ * Representa un error al interpretar (parse) los datos del mensaje.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class MessageFormatException extends Exception { 
     private final TipoMensaje tipo;
     private final String details;
     
-    public MessageFormatException(TipoMensaje tipo, String details) {
+    public MessageFormatException(final TipoMensaje tipo, final String details) {
         this.tipo    = tipo;
         this.details = details;
     }
     
-    public MessageFormatException(String details, Throwable cause) {
+    public MessageFormatException(final String details, final Throwable cause) {
         super(details, cause);
         this.tipo    = TipoMensaje.DESCONOCIDO;
         this.details = details;

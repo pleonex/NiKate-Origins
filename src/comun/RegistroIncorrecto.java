@@ -22,21 +22,36 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- *
+ * Representa un mensaje de REGISTRO_INCORRECTO.
+ * 
  * @author Benito Palacios Sánchez
  */
 public class RegistroIncorrecto extends Mensaje {
 
+    /**
+     * Crea una nueva instancia a partir de sus parámetros.
+     * 
+     * @param numSec Número de secuencia.
+     */
     public RegistroIncorrecto(final short numSec) {
         super(TipoMensaje.REGISTRO_INCORRECTO, numSec);
     }
     
+    /**
+     * Crea una nueva instancia a partir de un flujo de entrada.
+     * Este mensaje no tiene ningún parámetro y por tanto no se lee nada
+     * del flujo de entrada. Este constructor está para hacerlo similar a otras
+     * clases de mensajes.
+     * 
+     * @param numSec Número de secuencia.
+     * @param inStream Flujo de entrada.
+     */
     public RegistroIncorrecto(final short numSec, final InputStream inStream) {
         super(TipoMensaje.REGISTRO_INCORRECTO, numSec);
     }
     
     @Override
-    protected void writeData(OutputStream outStream) {
+    protected void writeData(final OutputStream outStream) {
     }
     
 }
