@@ -38,6 +38,8 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
     private static final int CeldasPorFila = 10;
     private static final int TamanioCelda  = 40;
     private final String MapaPath = System.getProperty("user.dir") + "/res/mapa";
+    private final String SoundMain = System.getProperty("user.dir") + "/res/main_inicio.wav";
+    private final String SoundLoop = System.getProperty("user.dir") + "/res/main_loop.wav";
     
     private final short mapaId;
     private Image mapaImg;
@@ -49,11 +51,10 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
         int size = CeldasPorFila * TamanioCelda;
         this.setSize(size, size);
         this.setBackground(Color.red);
-        //this.requestFocus();
-        //this.addKeyListener(new OyenteTeclado());
         addKeyListener(this);
         addMouseListener(this);
         
+        Audio.playClipLoop(SoundMain, SoundLoop);
         
         this.mapaId = mapaId;
         this.loadMapa();

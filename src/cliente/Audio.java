@@ -39,6 +39,10 @@ public class Audio {
     public static void playClip(File clipFile) {
         new PlayClip(clipFile).start();
     }
+    
+    public static void playClipLoop(String clipMain, String clipLoop) {
+        new PlayClipLoop(clipMain, clipLoop).start();
+    }
 
     private static class PlayClip extends Thread {
         
@@ -54,20 +58,55 @@ public class Audio {
         
         @Override
         public void run() {
-        AudioListener listener = new AudioListener();
-        try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(clipFile)) {
-            try (Clip clip = AudioSystem.getClip()) {
-                clip.addLineListener(listener);
-                clip.open(audioInputStream);
+            AudioListener listener = new AudioListener();
+            try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(clipFile)) {
+                try (Clip clip = AudioSystem.getClip()) {
+                    clip.addLineListener(listener);
+                    clip.open(audioInputStream);
 
-                clip.start();
-                listener.waitUntilDone();
-            } catch (Exception ex) {
+                    clip.start();
+                    listener.waitUntilDone();
+                } catch (Exception ex) {
+                    System.err.println(ex.getMessage());
+                }
+            } catch (IOException | UnsupportedAudioFileException ex) {
                 System.err.println(ex.getMessage());
             }
-        } catch (IOException | UnsupportedAudioFileException ex) {
-            System.err.println(ex.getMessage());
         }
+    }
+    
+    private static class PlayClipLoop extends Thread {
+        
+        private final File clipFileMain;
+        private final File clipFileLoop;
+        
+        public PlayClipLoop(String clipPathMain, String clipPathLoop) {
+            this.clipFileMain = new File(clipPathMain);
+            this.clipFileLoop = new File(clipPathLoop);
+        }
+        
+        @Override
+        public void run() {
+            this.play(clipFileMain);
+            while (true)
+                this.play(clipFileLoop);
+        }
+        
+        private void play(File clipFile) {
+            AudioListener listener = new AudioListener();
+            try (AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(clipFile)) {
+                try (Clip clip = AudioSystem.getClip()) {
+                    clip.addLineListener(listener);
+                    clip.open(audioInputStream);
+
+                    clip.start();
+                    listener.waitUntilDone();
+                } catch (Exception ex) {
+                    System.err.println(ex.getMessage());
+                }
+            } catch (IOException | UnsupportedAudioFileException ex) {
+                System.err.println(ex.getMessage());
+            }
         }
     }
     
