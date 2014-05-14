@@ -100,7 +100,7 @@ public class Servidor {
         private final Map<TipoMensaje, ProcesaAccion> accciones = creaAcciones();
         private final Map<Short, Short> usuariosPermitidos = creaUsuarios();
         
-        private final static short MaxUsers = 3;
+        private final static short MaxUsers = 8;
         private short userId = -1;
         private short mapaId = -1;
 
