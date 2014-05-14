@@ -348,6 +348,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
         public void actionPerformed(ActionEvent ae) {
             principal.setAtacando(false);
             ((Timer)ae.getSource()).stop();
+            repaint();
         }
     };
 }

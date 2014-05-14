@@ -107,15 +107,15 @@ public class CreaPersonaje extends javax.swing.JDialog {
 
         lblHp.setText("Vida:");
 
-        spinHp.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
+        spinHp.setModel(new javax.swing.SpinnerNumberModel(5, 1, 12, 1));
 
         lblSalud.setText("Salud:");
 
-        spinSalud.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
+        spinSalud.setModel(new javax.swing.SpinnerNumberModel(5, 1, 12, 1));
 
         lblExp.setText("Experiencia:");
 
-        spinExp.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
+        spinExp.setModel(new javax.swing.SpinnerNumberModel(0, 0, 15, 1));
 
         lblImg.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
         lblImg.setPreferredSize(new java.awt.Dimension(40, 40));
