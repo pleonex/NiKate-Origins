@@ -21,6 +21,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +34,7 @@ import javax.swing.JPanel;
  *
  * @author Benito Palacios Sánchez
  */
-public class JMapa extends JPanel {
+public class JMapa extends JPanel implements KeyListener, MouseListener {
     private static final int CeldasPorFila = 10;
     private static final int TamanioCelda  = 40;
     private final String MapaPath = System.getProperty("user.dir") + "/res/mapa";
@@ -45,6 +49,11 @@ public class JMapa extends JPanel {
         int size = CeldasPorFila * TamanioCelda;
         this.setSize(size, size);
         this.setBackground(Color.red);
+        //this.requestFocus();
+        //this.addKeyListener(new OyenteTeclado());
+        addKeyListener(this);
+        addMouseListener(this);
+        
         
         this.mapaId = mapaId;
         this.loadMapa();
@@ -82,5 +91,73 @@ public class JMapa extends JPanel {
         g.drawImage(p.getImage(), x, y, this);
         g.drawString("ID: " + p.getId(), x + 2, y - 10);
         g.drawString(p.getVida() + "/" + p.getSalud(), x, y + 2);
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        short pos = principal.getPosicion();
+
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_W:
+                if (pos / CeldasPorFila > 1) {
+                    principal.setPosicion((short)(pos - CeldasPorFila));
+                    repaint();
+                }
+                break;
+
+            case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_S:
+                if (pos / CeldasPorFila < 10 - 1) {
+                    principal.setPosicion((short)(pos + CeldasPorFila));
+                    repaint();
+                }
+                break;
+
+            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_A:
+                if (pos % CeldasPorFila > 0) {
+                    principal.setPosicion((short)(pos - 1));
+                    repaint();
+                }
+                break;
+
+            case KeyEvent.VK_RIGHT:
+            case KeyEvent.VK_D:
+                if (pos % CeldasPorFila < CeldasPorFila - 1) {
+                    principal.setPosicion((short)(pos + 1));
+                    repaint();
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        requestFocusInWindow();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
     }
 }
