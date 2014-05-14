@@ -31,6 +31,12 @@ public class MessageFormatException extends Exception {
         this.details = details;
     }
     
+    public MessageFormatException(String details, Throwable cause) {
+        super(details, cause);
+        this.tipo    = TipoMensaje.DESCONOCIDO;
+        this.details = details;
+    }
+    
     @Override
     public String getMessage() {
         return String.format("Invalid message format.\nType: %s\nCause: %s",

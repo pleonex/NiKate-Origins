@@ -76,6 +76,7 @@ public abstract class Mensaje {
             }
         } catch (IOException ex) {
             System.out.println("ERROR " + ex.getMessage());
+            throw new MessageFormatException(ex.getMessage(), ex);
         }
 
         return msg;
