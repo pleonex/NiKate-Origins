@@ -117,6 +117,10 @@ public class Servidor {
             return this.lastUpdate;
         }
         
+        public short getUserId() {
+            return this.userId;
+        }
+        
         public void recibe(final DatagramPacket paquete) {
             // Nunca viene mal recomprobarlo...
             if (!paquete.getSocketAddress().equals(this.address))
@@ -212,14 +216,14 @@ public class Servidor {
             short passwd = mensaje.getUsuarioPassword();
             
             System.out.printf("Registro: 0x%X 0x%X\n", usId, passwd);
-            
+                        
             Mensaje respuesta;
             if (false) {
             //if (this.usuariosPermitidos.get(usId) != passwd) {
                 respuesta = new RegistroIncorrecto(mensaje.getNumSecuencia());
             } else {
                 this.userId = usId;
-                this.mapaId = this.setMapId();
+                this.mapaId = this.setMapId(usId);
                 respuesta = new RegistroCorrecto(
                         mensaje.getNumSecuencia(),
                         mapaId,
@@ -230,11 +234,11 @@ public class Servidor {
             this.envia(respuesta);
         }
 
-        private short setMapId() {
+        private short setMapId(short usId) {
             short mapId = -1;
             
             for (short key : this.servicios.keySet())
-                if (this.servicios.get(key).size() < MaxUsers)
+                if (this.servicios.get(key).size() < MaxUsers && !checkSpoofing(key, usId))
                     mapId = key;
             
             if (mapId == -1) {
@@ -244,6 +248,15 @@ public class Servidor {
             
             this.servicios.get(mapId).add(this);
             return mapId;
+        }
+        
+        private boolean checkSpoofing(short key, short usId) {
+            boolean spoofing = false;
+            for (Servicio serv : servicios.get(key))
+                if (serv != this && serv.getUserId() == usId)
+                    spoofing = true;
+            
+            return spoofing;
         }
         
         private void procesaActualizacion(Actualizacion mensaje) {
