@@ -16,20 +16,20 @@
  */
 package servidor;
 
-import comun.TipoMensaje;
-import comun.Mensaje;
-import comun.RegistroIncorrecto;
-import comun.Confirmacion;
-import comun.MessageFormatException;
-import comun.Crc16;
-import comun.RegistroSolicitud;
-import comun.RegistroCorrecto;
 import comun.Actualizacion;
+import comun.Confirmacion;
+import comun.Crc16;
+import comun.Mensaje;
+import comun.MessageFormatException;
+import comun.RegistroCorrecto;
+import comun.RegistroIncorrecto;
+import comun.RegistroSolicitud;
+import comun.TipoMensaje;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,19 +59,31 @@ public class Servidor {
     }
 
     private static void iniciarServicio(final int puerto) {
-        Map<Short, List<Servicio>> servicios = new HashMap<>();
-
+        // Diccionario para controlar de quién es cada paquete
+        Map<SocketAddress, Servicio> addrServicio = new HashMap<>();
+        
+        // Diccionario para que los servicios se encuentren entre sí.
+        Map<Short, List<Servicio>> mapServicio = new HashMap<>();
+        
         try {
-            ServerSocket socket = new ServerSocket(puerto);
+            DatagramSocket socket = new DatagramSocket(puerto);
 
             while (true) {
-                // Espero a recibir una nueva petición del cliente.
-                Socket userSocket = socket.accept();
+                // Recibo un nuevo paquete
+                byte[] buffer = new byte[Mensaje.GetMaxMsgSize()];
+                DatagramPacket paquete = new DatagramPacket(buffer, buffer.length);
+                socket.receive(paquete);
 
-                // Para cada cliente nuevo, creo una nueva hebra que tendrá
-                // el socket para realizar la comunicación y los servicios
-                Servicio serv = new Servicio(userSocket, servicios);
-                serv.start();
+                // Compruebo si el servicio al que le corresponde esta dirección
+                // existía de antes o no. En ese caso lo creo
+                SocketAddress addr = paquete.getSocketAddress();
+                if (!addrServicio.containsKey(addr)) {
+                    Servicio serv = new Servicio(socket, addr, mapServicio);
+                    addrServicio.put(addr, serv);
+                }
+                 
+                // Le envío el paquete al servicio
+                addrServicio.get(addr).recibe(paquete);
             }
 
         } catch (IOException ex) {
@@ -79,11 +91,10 @@ public class Servidor {
         }
     }
 
-    private static class Servicio extends Thread {
+    private static class Servicio {
 
-        private final Socket socket;
-        private InputStream inStream;
-        private OutputStream outStream;
+        private final DatagramSocket socket;
+        private final SocketAddress address;
         
         private final Map<Short, List<Servicio>> servicios;
         private final Map<TipoMensaje, ProcesaAccion> accciones = creaAcciones();
@@ -93,51 +104,49 @@ public class Servidor {
         private short userId = -1;
         private short mapaId = -1;
 
-        public Servicio(final Socket socket, 
+        public Servicio(final DatagramSocket socket, final SocketAddress address, 
                 final Map<Short, List<Servicio>> servicios) {
-            this.socket = socket;
+            this.socket  = socket;
+            this.address = address;
             this.servicios = servicios;
-            
-            try {
-                this.inStream  = socket.getInputStream();
-                this.outStream = socket.getOutputStream();
-            } catch (IOException ex) {
-            }
         }
 
-        @Override
-        public void run() {
-            // Mientras haya conexión
-            while (!this.socket.isClosed()) {
-                // Obtiene una petición del cliente. Depende del estado en el
-                // que se encuentre el servidor.
-                Mensaje mensaje = null;
-                try {
-                    mensaje = Mensaje.FromStream(this.inStream);
-                } catch (MessageFormatException ex) {
-                    // Vale algo ha fallado por aquí...
-                    System.err.println(ex.getMessage());
-                }
-                
-                // Si no ha habido fallo
-                if (mensaje != null)
-                    this.procesaMensaje(mensaje);
-            }
+        public void recibe(final DatagramPacket paquete) {
+            // Nunca viene mal recomprobarlo...
+            if (!paquete.getSocketAddress().equals(this.address))
+                return;
 
-            // Eliminamos este servicio cuando haya desconexión
-            if (this.mapaId != -1)
-                this.servicios.remove(this.mapaId);
-
-            // Cierra la conexión
+            // Obtiene una petición del cliente.
+            Mensaje mensaje = null;
             try {
-                this.socket.close();
-            } catch (IOException ex) {
-                System.err.println("ERROR: " + ex.getMessage());
+                ByteArrayInputStream inStream = new ByteArrayInputStream(paquete.getData());
+                mensaje = Mensaje.FromStream(inStream);
+            } catch (MessageFormatException ex) {
+                // Vale algo ha fallado por aquí...
+                System.err.println(ex.getMessage());
             }
+
+            // Si no ha habido fallo
+            if (mensaje != null)
+                this.procesaMensaje(mensaje);
         }
 
         public void enviaActualizacion(Actualizacion mensaje) {
-            mensaje.write(this.outStream);
+            this.envia(mensaje);
+        }
+        
+        private void envia(Mensaje mensaje) {
+            try {
+                byte[] data = mensaje.write();
+                DatagramPacket paquete = new DatagramPacket(
+                        data,
+                        data.length,
+                        this.address
+                );
+                this.socket.send(paquete);
+            } catch (IOException ex) {
+                System.err.println("ERROR: " + ex.getMessage());
+            }            
         }
         
         private void procesaMensaje(Mensaje mensaje) {
@@ -196,20 +205,20 @@ public class Servidor {
             short usId = mensaje.getUsuarioId();
             short passwd = mensaje.getUsuarioPassword();
             
+            Mensaje respuesta;
             if (this.usuariosPermitidos.get(usId) != passwd) {
-                Mensaje incorrecto = new RegistroIncorrecto(mensaje.getNumSecuencia());
-                incorrecto.write(this.outStream);
+                respuesta = new RegistroIncorrecto(mensaje.getNumSecuencia());
             } else {
                 this.userId = usId;
                 this.mapaId = this.setMapId();
-                Mensaje correcto = new RegistroCorrecto(
+                respuesta = new RegistroCorrecto(
                         mensaje.getNumSecuencia(),
                         mapaId,
                         (byte)this.servicios.get(this.mapaId).size()
                 );
-                correcto.write(this.outStream);
             }
             
+            this.envia(respuesta);
         }
 
         private short setMapId() {
@@ -246,7 +255,7 @@ public class Servidor {
                     mensaje.getNumSecuencia(),
                     Crc16.calculate(mensaje.write())
             );
-            confirmacion.write(this.outStream);
+            this.envia(confirmacion);
         }
     }
 }

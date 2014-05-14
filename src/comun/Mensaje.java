@@ -38,6 +38,10 @@ public abstract class Mensaje {
         this.numSec = numSec;
     }
     
+    public static int GetMaxMsgSize() {
+        return 0x0A;
+    }
+    
     public static Mensaje FromStream(final InputStream inStream) 
             throws MessageFormatException {        
         DataInputStream reader = new DataInputStream(inStream);
