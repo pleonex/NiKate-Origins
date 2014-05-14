@@ -1,0 +1,97 @@
+#######################################
+#######################################
+##                                   ##
+##          NiKate - Origins         ##
+##               v1.0                ##
+##                                   ##
+#######################################
+#######################################
+por Benito Palacios Sánchez
+
+
+|-> Objetivo del juego y módo de juego
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Se trata de un simple juego MMORPG, en
+el que el jugador tiene que tratar de
+conseguir 15 puntos de experiencia.
+
+Los puntos de experiencia se consigue
+colocándose encima de otro jugador.
+Por cada acción de esta que se realice
+se conseguirá un punto nuevo.
+
+Además, cada jugador tiene unos puntos
+de vida. Estos se perderán al ser
+alcanzado por el ataque de un jugador.
+Cuando se ataca, se producen unas
+llamaradas de fuego que alcanzarán a
+los enemigos situados en X alrededor
+del jugador. A continuación se muestra
+una figura con las posición en las que
+se dañará a otros jugadores.
+
+X -> Jugador dañado
+O -> Nuestro jugador
+# -> Casilla normal
+
+X  #  X
+#  O  #
+X  #  X
+
+El ataque dura 1 segundo.
+
+Existen hasta 4 mapas. Cada uno de
+ellos admite hasta 8 jugadores
+simultáneos. El servidor asignará
+el mapa a cada jugador al inicio.
+Esta asignación se hará por
+disponibilidad. Además, si se quiere
+iniciar sesión con un ID de usuario
+ya en uso, el servidor permitirá
+el inicio pero asignará otro mapa.
+
+
+|-> Controles
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mover al jugador
+ * W o fecha arriba: Mover hacia arriba
+ * S o flecha abajo: Mover hacia abajo
+ * A o flecha izquierda: Mover a la izq
+ * D o flecha derecha: Mover a la der
+Atacar
+ * Barra espaciadora
+
+ 
+|-> Requisitos y ejecución
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+El juego necesita tener la carpeta
+"res" con los archivos de gráficos y
+audio del juego. Esta carpeta no está
+incluida junto al código por defecto.
+La estructura de la carpeta es:
+
+./res/
+./res/ALDEANO.png -> personaje aldeano
+./res/DIOS.png    -> personaje dios
+./res/MAGO.png    -> personaje mago
+./res/SABIO.png   -> personaje sabio
+./res/fuego.png   -> gráfico de ataque
+./res/mapa0.png   -> mapa 0
+./res/mapa1.png   -> mapa 1
+./res/mapa2.png   -> mapa 2
+./res/mapa3.png   -> mapa 3
+./res/inicio.wav  -> audio de inicio
+./res/main_inicio.wav -> audio de fondo
+                         principal
+./res/main_loop.wav -> audio de fondo
+                       de bucle
+                       
+Para ejecutar el cliente se puede hacer
+directamente desde el archivo .jar como
+sigue:
+java -jar NiKate_-_Origins.jar
+
+Para ejecutar el servidor se habrá de
+ejecutar la clase como sigue:
+java servidor/Servidor 9090
+donde 9090 es el puerto que escuchará.
