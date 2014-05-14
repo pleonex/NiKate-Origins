@@ -19,6 +19,7 @@ package cliente;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.File;
 
 /**
  *
@@ -33,6 +34,7 @@ public enum TipoPersonaje {
     ALDEANO(0x03);
     
     private final byte id;
+    private final static Image[] Images = LoadImages();
     
     TipoPersonaje(final int id) {
         this.id = (byte)id;
@@ -53,7 +55,19 @@ public enum TipoPersonaje {
     }    
     
     public Image getImage() {   
-        String path = System.getProperty("user.dir") + this.name() + ".png";
-        return Toolkit.getDefaultToolkit().createImage(path);
+        return Images[this.id];
+    }
+    
+    private static Image[] LoadImages() {
+        String basePath = System.getProperty("user.dir") + "/res/";
+
+        Image[] images = new Image[TipoPersonaje.values().length];
+        for (TipoPersonaje value : TipoPersonaje.values()) {
+            String path = basePath + value.name() + ".png";
+            if (new File(path).exists())
+                images[value.getId()] = Toolkit.getDefaultToolkit().createImage(path);
+        }
+        
+        return images;
     }
 }
