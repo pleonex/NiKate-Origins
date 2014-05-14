@@ -16,6 +16,15 @@
  */
 package servidor;
 
+import comun.TipoMensaje;
+import comun.Mensaje;
+import comun.RegistroIncorrecto;
+import comun.Confirmacion;
+import comun.MessageFormatException;
+import comun.Crc16;
+import comun.RegistroSolicitud;
+import comun.RegistroCorrecto;
+import comun.Actualizacion;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,7 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import mensajes.*;
 
 /**
  *

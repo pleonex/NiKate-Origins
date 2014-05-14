@@ -15,7 +15,7 @@
  *
  *************************************************************************/
 
-package mensajes;
+package comun;
 
 public class Crc16 { 
     private static final int[] Table = {

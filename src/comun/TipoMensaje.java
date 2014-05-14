@@ -15,7 +15,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-package mensajes;
+package comun;
 
 /**
  * Identifica el tipo de mensaje.

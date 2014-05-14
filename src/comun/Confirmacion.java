@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-package mensajes;
+package comun;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,48 +28,37 @@ import java.io.OutputStream;
  *
  * @author Benito Palacios Sánchez
  */
-public class RegistroCorrecto extends Mensaje {
-    private short mapaId;
-    private byte numPersonajes;
+public class Confirmacion extends Mensaje {
+    private short msgHash;
     
-    public RegistroCorrecto(final short numSec, final short mapaId,
-            final byte numPersonajes) {
-        super(TipoMensaje.REGISTRO_CORRECTO, numSec);
+    public Confirmacion(final short numSec, final short msgHash) {
+        super(TipoMensaje.CONFIRMACION, numSec);
         
-        this.mapaId = mapaId;
-        this.numPersonajes = numPersonajes;
+        this.msgHash = msgHash;
     }
     
-    public RegistroCorrecto(final short numSec, final InputStream inStream) {
-        super(TipoMensaje.REGISTRO_CORRECTO, numSec);
+    public Confirmacion(final short numSec, final InputStream inStream) {
+        super(TipoMensaje.CONFIRMACION, numSec);
         
+        DataInputStream reader = new DataInputStream(inStream);
         try {
-            DataInputStream reader = new DataInputStream(inStream);
-            this.mapaId = reader.readShort();
-            this.numPersonajes = reader.readByte();
+            this.msgHash = reader.readShort();
         } catch (IOException ex) {
             System.out.println("ERROR " + ex.getMessage());
         }
     }
 
-    public short getMapaId() {
-        return mapaId;
+    public short getMsgHash() {
+        return msgHash;
     }
-
-    public byte getNumPersonajes() {
-        return numPersonajes;
-    }
-        
+    
     @Override
-    protected void writeData(OutputStream outStream) {
+    protected void writeData(final OutputStream outStream) {
         DataOutputStream writer = new DataOutputStream(outStream);
-        
         try {
-            writer.writeShort(this.mapaId);
-            writer.writeByte(this.numPersonajes);
+            writer.writeShort(this.msgHash);
         } catch (IOException ex) {
             System.out.println("ERROR " + ex.getMessage());
         }
     }
-    
 }

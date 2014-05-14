@@ -15,7 +15,7 @@
  * along with this program.  If not, see http://www.gnu.org/licenses/.
  */
 
-package mensajes;
+package comun;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
