@@ -23,7 +23,9 @@ import comun.TipoMensaje;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -32,7 +34,10 @@ import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import javax.swing.AbstractAction;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 /**
  *
@@ -192,6 +197,11 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
                 
             case KeyEvent.VK_X:
             case KeyEvent.VK_SPACE:
+                if (principal.getAtacando())
+                    break;
+                
+                Timer timer = new Timer(2000, ataque);
+                timer.start();
                 principal.setAtacando(true);
                 ataca();
                 repaint();
@@ -288,4 +298,13 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
         while (this.cliente.recibeBloqueante().getTipo() != TipoMensaje.CONFIRMACION)
             ;
     }
+    
+    private final AbstractAction ataque = new AbstractAction() {
+                
+        @Override
+        public void actionPerformed(ActionEvent ae) {
+            principal.setAtacando(false);
+            ((Timer)ae.getSource()).stop();
+        }
+    };
 }
