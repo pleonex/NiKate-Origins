@@ -26,13 +26,15 @@ import java.awt.GridLayout;
  */
 public class MainWindow extends javax.swing.JFrame {
     private JMapa mapa;
+    private Personaje principal = new Personaje((short)0, TipoPersonaje.DIOS,
+            (byte)10, (byte)10, (byte)10, (short)11, (short)0);
     
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
-        this.mapa = new JMapa();
+        this.mapa = new JMapa(principal, (short)0);
         this.add(this.mapa, BorderLayout.CENTER);
     }
 
