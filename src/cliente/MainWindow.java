@@ -37,8 +37,10 @@ public class MainWindow extends javax.swing.JFrame {
         initComponents();
         this.principal = principal;
         this.cliente = cliente;
-        this.mapa = new JMapa(principal, map);
+        this.mapa = new JMapa(principal, map, cliente);
         this.add(this.mapa, BorderLayout.CENTER);
+        
+        this.setTitle("NiKate - Origins ~~ Mapa " + map);
     }
 
     /**
@@ -51,6 +53,7 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("NiKate - Origins");
         setPreferredSize(new java.awt.Dimension(430, 440));
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {

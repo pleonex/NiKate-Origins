@@ -152,7 +152,7 @@ public class Servidor {
         private void procesaMensaje(Mensaje mensaje) {
             // DEBUG INFO
             if (this.userId != -1)
-                System.out.printf("[%x][%s] ", this.userId, mensaje.getTipo().name());
+                System.out.printf("[%x][%s]\n", this.userId, mensaje.getTipo().name());
 
             // Según el tipo de mensaje realiza una acción u otra.
             if (this.accciones.containsKey(mensaje.getTipo())) {
@@ -208,7 +208,8 @@ public class Servidor {
             System.out.printf("Registro: 0x%X 0x%X\n", usId, passwd);
             
             Mensaje respuesta;
-            if (this.usuariosPermitidos.get(usId) != passwd) {
+            if (false) {
+            //if (this.usuariosPermitidos.get(usId) != passwd) {
                 respuesta = new RegistroIncorrecto(mensaje.getNumSecuencia());
             } else {
                 this.userId = usId;

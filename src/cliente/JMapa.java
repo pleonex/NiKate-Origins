@@ -17,6 +17,9 @@
 
 package cliente;
 
+import comun.Actualizacion;
+import comun.Mensaje;
+import comun.TipoMensaje;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
@@ -26,6 +29,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JPanel;
@@ -34,34 +38,42 @@ import javax.swing.JPanel;
  *
  * @author Benito Palacios Sánchez
  */
-public class JMapa extends JPanel implements KeyListener, MouseListener {
+public class JMapa extends JPanel implements KeyListener, MouseListener,
+        MensajeListener {
     private static final int CeldasPorFila = 10;
     private static final int TamanioCelda  = 40;
     private final String MapaPath = System.getProperty("user.dir") + "/res/mapa";
     private final String SoundMain = System.getProperty("user.dir") + "/res/main_inicio.wav";
     private final String SoundLoop = System.getProperty("user.dir") + "/res/main_loop.wav";
     
+    private final Cliente cliente;
     private final short mapaId;
     private Image mapaImg;
+    private short numSec = 0;
+    private long inicio;
     
     private final Personaje principal;
     private final Map<Short, Personaje> personajes;
     
-    public JMapa(Personaje principal, short mapaId) {
-        int size = CeldasPorFila * TamanioCelda;
-        this.setSize(size, size);
-        this.setBackground(Color.red);
-        addKeyListener(this);
-        addMouseListener(this);
-        
+    public JMapa(Personaje principal, short mapaId, Cliente cliente) {
         Audio.playClipLoop(SoundMain, SoundLoop);
         
+        this.inicio = new Date().getTime();
+        this.cliente = cliente;
+        cliente.setUpdateListener(this);
         this.mapaId = mapaId;
         this.loadMapa();
         
         this.principal  = principal;
         this.personajes = new HashMap<>();
         this.personajes.put(principal.getId(), principal);
+        
+        int size = CeldasPorFila * TamanioCelda;
+        this.setSize(size, size);
+        this.setBackground(Color.red);
+        addKeyListener(this);
+        addMouseListener(this);
+        this.enviaActualizacion(this.principal);
     }
     
     private void loadMapa() {
@@ -112,6 +124,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
                 if (pos / CeldasPorFila > 1) {
                     principal.setPosicion((short)(pos - CeldasPorFila));
                     repaint();
+                    this.enviaActualizacion(this.principal);
                 }
                 break;
 
@@ -120,6 +133,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
                 if (pos / CeldasPorFila < 10 - 1) {
                     principal.setPosicion((short)(pos + CeldasPorFila));
                     repaint();
+                    this.enviaActualizacion(this.principal);
                 }
                 break;
 
@@ -128,6 +142,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
                 if (pos % CeldasPorFila > 0) {
                     principal.setPosicion((short)(pos - 1));
                     repaint();
+                    this.enviaActualizacion(this.principal);
                 }
                 break;
 
@@ -136,6 +151,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
                 if (pos % CeldasPorFila < CeldasPorFila - 1) {
                     principal.setPosicion((short)(pos + 1));
                     repaint();
+                    this.enviaActualizacion(this.principal);
                 }
                 break;
         }
@@ -160,5 +176,49 @@ public class JMapa extends JPanel implements KeyListener, MouseListener {
 
     @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    @Override
+    public void mensajeRecibido(Mensaje mensaje) {
+        Actualizacion actual = (Actualizacion)mensaje;
+        short id = actual.getUserId();
+        
+        Personaje p;
+        if (this.personajes.containsKey(id)) {
+            // Actualizar personaje
+            p = this.personajes.get(id);
+            p.setExp(actual.getExperiencia());
+            p.setVida(actual.getVida());
+            p.setPosicion(actual.getPosicion());
+        } else {
+            p = new Personaje(
+                    id,
+                    TipoPersonaje.fromId(actual.getClase()),
+                    actual.getVida(),
+                    actual.getSalud(),
+                    actual.getExperiencia(),
+                    actual.getPosicion(),
+                    this.mapaId
+            );
+            this.personajes.put(id, p);
+        }
+        
+        repaint();
+    }
+    
+    private void enviaActualizacion(Personaje p) {
+        Actualizacion actual = new Actualizacion(
+                numSec,
+                p.getId(),
+                p.getTipo().getId(),
+                p.getExp(),
+                p.getSalud(),
+                p.getVida(),
+                p.getPosicion(),
+                (short)((new Date().getTime() - inicio) / 1000)
+        );
+        this.cliente.envia(actual);
+        while (this.cliente.recibeBloqueante().getTipo() != TipoMensaje.CONFIRMACION)
+            ;
     }
 }
