@@ -65,6 +65,11 @@ public class IniciaSesion extends javax.swing.JFrame {
         setTitle("NiKate - Origins");
         setPreferredSize(new java.awt.Dimension(269, 270));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         lblUserId.setText("ID usuario:");
 
@@ -209,6 +214,10 @@ public class IniciaSesion extends javax.swing.JFrame {
             System.err.println(ex.getMessage());
         }
     }//GEN-LAST:event_btnStartActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        Audio.stopAll();
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
