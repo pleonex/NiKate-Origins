@@ -36,7 +36,7 @@ public class JMapa extends JPanel {
         this.setSize(size, size);
         this.setBackground(Color.red);
         this.personajes = new Personaje[] {
-            new Personaje((short)0, TipoPersonaje.DIOS, (byte)10, (byte)10, (byte)10, (short)0, (short)0)
+            new Personaje((short)0, TipoPersonaje.DIOS, (byte)10, (byte)10, (byte)10, (short)11, (short)0)
         };
     }
     
@@ -57,6 +57,7 @@ public class JMapa extends JPanel {
         int y = (pos / CeldasPorFila) * TamanioCelda;
         
         g.drawImage(p.getImage(), x, y, this);
-        g.drawString("ID: " + p.getId(), x, y - 5);
+        g.drawString("ID: " + p.getId(), x + 2, y - 10);
+        g.drawString(p.getVida() + "/" + p.getSalud(), x, y + 2);
     }
 }
