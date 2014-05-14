@@ -256,9 +256,26 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             if (p == principal)
                 continue;
             
-            if (p.getPosicion() == principal.getPosicion())
+            if (p.getPosicion() == principal.getPosicion()) {
                 principal.setExp((byte)(principal.getExp() + 1));
+                if (principal.getExp() == 15) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "¡¡Has ganado!!",
+                            "ENHORABUENA",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                    desconecta();
+                    System.exit(0);
+                }
+            }
         }
+    }
+    
+    public void desconecta() {
+        // Hacemos como si hubiesemos perdido
+        principal.setVida((byte)0xFF);
+        enviaActualizacion(principal);
     }
 
     @Override

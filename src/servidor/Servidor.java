@@ -263,6 +263,7 @@ public class Servidor {
             // Comprueba si nos han eliminado
             if (mensaje.getUserId() == this.userId && (
                     mensaje.getVida() == 0 || mensaje.getVida() >= 13)) {
+                System.out.println("[" + Integer.toHexString(userId) + "] Eliminandome");
                 this.servicios.get(this.mapaId).remove(this);
             }
         }
