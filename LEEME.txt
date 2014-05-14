@@ -92,7 +92,12 @@ La estructura de la carpeta es:
                          principal
 ./res/main_loop.wav -> audio de fondo
                        de bucle
-                       
+
+Las imágenes de los personajes y del
+ataque han de tener un tamaño de 40x40.
+Las imágenes de los mapas han de ser
+400x400.
+
 Para ejecutar el cliente se puede hacer
 directamente desde el archivo .jar como
 sigue:
