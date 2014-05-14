@@ -16,8 +16,12 @@
  */
 package cliente;
 
+import comun.Crc16;
 import comun.Mensaje;
 import comun.MessageFormatException;
+import comun.RegistroCorrecto;
+import comun.RegistroSolicitud;
+import comun.TipoMensaje;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -134,7 +138,7 @@ public class Cliente {
         }
     }
 
-    private Mensaje recibeBloqueante() {
+    public Mensaje recibeBloqueante() {
         try {
             // Aunque no es lo mejor, para pequeños mensajes al servidor está bien
             while (msgRecibidos.isEmpty()) {
@@ -148,6 +152,28 @@ public class Cliente {
         return null;
     }
 
+    public short iniciaSesion(String userId, String password) {
+        short hexId = Short.parseShort(userId, 16);
+        short hashPass = Crc16.calculate(password.getBytes());
+        
+        // Envía la solicitud
+        RegistroSolicitud solicitud = new RegistroSolicitud(
+                (short)0,
+                hexId,
+                hashPass
+        );
+        this.envia(solicitud);
+        
+        // Espera la respuesta
+        Mensaje respuesta = this.recibeBloqueante();
+        
+        // La procesa
+        if (respuesta.getTipo() == TipoMensaje.REGISTRO_CORRECTO)
+            return ((RegistroCorrecto)respuesta).getMapaId();
+        else
+            return -1;
+    }
+    
     private class DefaultListenerImpl implements MensajeListener {
 
         @Override

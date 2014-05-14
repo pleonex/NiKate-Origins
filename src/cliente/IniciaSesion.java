@@ -17,6 +17,11 @@
 
 package cliente;
 
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
+
 /**
  *
  * @author Benito Palacios Sánchez
@@ -46,12 +51,18 @@ public class IniciaSesion extends javax.swing.JFrame {
         btnStart = new javax.swing.JButton();
         txtUserId = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
-        txtPassword = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
+        lblHost = new javax.swing.JLabel();
+        txtHost = new javax.swing.JTextField();
+        txtPort = new javax.swing.JTextField();
+        lblPort = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
+        txtPassword = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("NiKate - Origins");
+        setPreferredSize(new java.awt.Dimension(269, 260));
         setResizable(false);
 
         lblUserId.setText("ID usuario:");
@@ -62,6 +73,8 @@ public class IniciaSesion extends javax.swing.JFrame {
                 btnStartActionPerformed(evt);
             }
         });
+
+        txtUserId.setText("1F1F");
 
         jLabel1.setText("Contraseña:");
 
@@ -77,28 +90,45 @@ public class IniciaSesion extends javax.swing.JFrame {
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setText("NiKate");
 
+        lblHost.setText("Host:");
+
+        txtHost.setText("localhost");
+
+        txtPort.setText("9090");
+
+        lblPort.setText("Puerto:");
+
+        txtPassword.setText("patatas");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addComponent(jButton1)
-                    .addComponent(lblUserId))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtUserId)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 17, Short.MAX_VALUE)
-                        .addComponent(btnStart))
-                    .addComponent(txtPassword))
-                .addContainerGap())
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel2)
                 .addGap(39, 39, 39))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jButton1)
+                            .addComponent(lblUserId)
+                            .addComponent(lblHost)
+                            .addComponent(lblPort))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtUserId)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 28, Short.MAX_VALUE)
+                                .addComponent(btnStart))
+                            .addComponent(txtHost)
+                            .addComponent(txtPort)
+                            .addComponent(txtPassword))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -106,6 +136,16 @@ public class IniciaSesion extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(jLabel2)
                 .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblHost)
+                    .addComponent(txtHost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblPort))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lblUserId)
                     .addComponent(txtUserId, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -117,7 +157,7 @@ public class IniciaSesion extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnStart)
                     .addComponent(jButton1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(49, 49, 49))
         );
 
         pack();
@@ -128,7 +168,33 @@ public class IniciaSesion extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
-        // TODO add your handling code here:
+        try {
+            // Crea el socket y la dirección
+            SocketAddress addr = new InetSocketAddress(
+                    this.txtHost.getText(),
+                    Integer.parseInt(this.txtPort.getText())
+            );
+            DatagramSocket socket = new DatagramSocket();
+
+            // Crea el cliente y se intenta autenticar
+            Cliente cliente = new Cliente(socket, addr);
+            short map = cliente.iniciaSesion(
+                    this.txtUserId.getText(),
+                    new String(this.txtPassword.getPassword())
+            );
+            
+            if (map != -1) {
+                // Crear personaje:
+                // TODO:
+                
+                // Empezamos a jugar
+                // TODO:
+                
+                this.setVisible(false);
+            }
+        } catch (SocketException ex) {
+            System.err.println(ex.getMessage());
+        }
     }//GEN-LAST:event_btnStartActionPerformed
 
     /**
@@ -171,8 +237,13 @@ public class IniciaSesion extends javax.swing.JFrame {
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JLabel lblHost;
+    private javax.swing.JLabel lblPort;
     private javax.swing.JLabel lblUserId;
-    private javax.swing.JTextField txtPassword;
+    private javax.swing.JTextField txtHost;
+    private javax.swing.JPasswordField txtPassword;
+    private javax.swing.JTextField txtPort;
     private javax.swing.JTextField txtUserId;
     // End of variables declaration//GEN-END:variables
 }
