@@ -33,6 +33,8 @@ public class Personaje {
     
     private short posicion;
     private final short mapaId;
+    
+    private boolean atacando;
 
     public Personaje(short id, TipoPersonaje tipo, byte vida, byte salud,
             byte exp, short posicion, short mapaId) {
@@ -44,6 +46,8 @@ public class Personaje {
         
         this.posicion = posicion;
         this.mapaId   = mapaId;
+        
+        this.atacando = false;
     }
 
     public static int getAtaque() {
@@ -92,6 +96,14 @@ public class Personaje {
     
     public Image getImage() {
         return this.tipo.getImage();
+    }
+    
+    public boolean getAtacando() {
+        return this.atacando;
+    }
+    
+    public void setAtacando(boolean value) {
+        this.atacando = value;
     }
 }
 

@@ -43,12 +43,14 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
     private static final int CeldasPorFila = 10;
     private static final int TamanioCelda  = 40;
     private final String MapaPath = System.getProperty("user.dir") + "/res/mapa";
+    private final String AtaquePath = System.getProperty("user.dir") + "/res/fuego.png";
     private final String SoundMain = System.getProperty("user.dir") + "/res/main_inicio.wav";
     private final String SoundLoop = System.getProperty("user.dir") + "/res/main_loop.wav";
     
     private final Cliente cliente;
     private final short mapaId;
     private Image mapaImg;
+    private Image ataqueImg;
     private short numSec = 0;
     private long inicio;
     
@@ -62,7 +64,8 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
         this.cliente = cliente;
         cliente.setUpdateListener(this);
         this.mapaId = mapaId;
-        this.loadMapa();
+        this.mapaImg = this.loadImg(MapaPath + this.mapaId + ".png");
+        this.ataqueImg = this.loadImg(AtaquePath);
         
         this.principal  = principal;
         this.personajes = new HashMap<>();
@@ -76,12 +79,11 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
         this.enviaActualizacion(this.principal);
     }
     
-    private void loadMapa() {
-        String path = MapaPath + this.mapaId + ".png";
+    private Image loadImg(String path) {
         if (new File(path).exists())
-            this.mapaImg = Toolkit.getDefaultToolkit().createImage(path);
+            return Toolkit.getDefaultToolkit().createImage(path);
         else
-            this.mapaImg = null;
+            return null;
     }
     
     @Override
@@ -111,13 +113,28 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
     
     private void paintPersonaje(Personaje p, Graphics g) {
         int pos = p.getPosicion();
-        
         int x = (pos % CeldasPorFila) * TamanioCelda;
         int y = (pos / CeldasPorFila) * TamanioCelda;
         
         g.drawImage(p.getImage(), x, y, this);
         g.drawString("ID: " + p.getId(), x + 2, y - 10);
         g.drawString(p.getVida() + "/" + p.getSalud(), x, y + 2);
+        
+        if (p.getAtacando()) {
+            this.paintImage(this.ataqueImg, g, pos - 1 + CeldasPorFila);
+            this.paintImage(this.ataqueImg, g, pos + 1 + CeldasPorFila);
+            this.paintImage(this.ataqueImg, g, pos - 1 - CeldasPorFila);
+            this.paintImage(this.ataqueImg, g, pos + 1 - CeldasPorFila);
+        }
+    }
+    
+    private void paintImage(Image img, Graphics g, int pos) {
+        int x = (pos % CeldasPorFila) * TamanioCelda;
+        int y = (pos / CeldasPorFila) * TamanioCelda;
+        
+        if ((x >= 0 && x <= (CeldasPorFila - 1) * TamanioCelda) &&
+            (y >= 0 && y <= (CeldasPorFila - 1) * TamanioCelda))
+                g.drawImage(img, x, y, this);
     }
     
     @Override
@@ -137,6 +154,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             case KeyEvent.VK_W:
                 if (pos / CeldasPorFila > 1) {
                     principal.setPosicion((short)(pos - CeldasPorFila));
+                    ataca();
                     repaint();
                     this.enviaActualizacion(this.principal);
                 }
@@ -146,6 +164,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             case KeyEvent.VK_S:
                 if (pos / CeldasPorFila < 10 - 1) {
                     principal.setPosicion((short)(pos + CeldasPorFila));
+                    ataca();
                     repaint();
                     this.enviaActualizacion(this.principal);
                 }
@@ -155,6 +174,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             case KeyEvent.VK_A:
                 if (pos % CeldasPorFila > 0) {
                     principal.setPosicion((short)(pos - 1));
+                    ataca();
                     repaint();
                     this.enviaActualizacion(this.principal);
                 }
@@ -164,11 +184,44 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             case KeyEvent.VK_D:
                 if (pos % CeldasPorFila < CeldasPorFila - 1) {
                     principal.setPosicion((short)(pos + 1));
+                    ataca();
                     repaint();
                     this.enviaActualizacion(this.principal);
                 }
                 break;
+                
+            case KeyEvent.VK_X:
+            case KeyEvent.VK_SPACE:
+                principal.setAtacando(true);
+                ataca();
+                repaint();
+                break;
         }
+    }
+    
+    private void ataca() {
+        if (!principal.getAtacando())
+            return;
+        
+        for (Personaje p : personajes.values()) {
+            if (p == principal)
+                continue;
+            
+            if (estaSiendoAtacado(p, principal)) {
+                p.setVida((byte)(p.getVida() - Personaje.getAtaque()));
+                enviaActualizacion(p);
+            }
+        }
+    }
+    
+    private boolean estaSiendoAtacado(Personaje atacante, Personaje atacado) {
+        int posAtacante = atacante.getPosicion();
+        int posAtacado  = atacado.getPosicion();
+        
+        return (posAtacado == posAtacante - 1 + CeldasPorFila) ||
+               (posAtacado == posAtacante + 1 + CeldasPorFila) ||
+               (posAtacado == posAtacante - 1 - CeldasPorFila) ||
+               (posAtacado == posAtacante + 1 - CeldasPorFila);
     }
 
     @Override
