@@ -23,24 +23,19 @@ import comun.TipoMensaje;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import javax.swing.AbstractAction;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 /**
@@ -59,10 +54,10 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
     
     private final Cliente cliente;
     private final short mapaId;
-    private Image mapaImg;
-    private Image ataqueImg;
+    private final Image mapaImg;
+    private final Image ataqueImg;
     private short numSec = 0;
-    private long inicio;
+    private final long inicio;
     
     private final Personaje principal;
     private final Map<Short, Personaje> personajes;
@@ -232,7 +227,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
                 enviaActualizacion(p);
                 
                 // Comprueba si nos lo hemos cargado
-                if (p.getVida() == 0 || p.getVida() >= 13)
+                if (p.getVida() <= 0 || p.getVida() >= 13)
                     borrar = p.getId();
             }
         }
@@ -344,6 +339,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
     }
     
     private void enviaActualizacion(Personaje p) {
+        numSec++;
         Actualizacion actual = new Actualizacion(
                 numSec,
                 p.getId(),
