@@ -195,15 +195,14 @@ public class IniciaSesion extends javax.swing.JFrame {
                 Personaje personaje = creaFrame.Personaje();
                 
                 // Empezamos a jugar
-                // TODO:
-                
                 Audio.stopAll();
+                MainWindow mainWindow = new MainWindow(personaje, map,cliente);
+                mainWindow.setVisible(true);
+                
                 this.processEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
             } else {
                 System.out.println("Registro inválido.");
             }
-            
-            cliente.parar();
         } catch (SocketException ex) {
             System.err.println(ex.getMessage());
         }

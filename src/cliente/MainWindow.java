@@ -18,6 +18,7 @@
 package cliente;
 
 import java.awt.BorderLayout;
+import java.awt.event.WindowEvent;
 
 /**
  *
@@ -25,15 +26,18 @@ import java.awt.BorderLayout;
  */
 public class MainWindow extends javax.swing.JFrame {
     private JMapa mapa;
-    private Personaje principal = new Personaje((short)0, TipoPersonaje.DIOS,
-            (byte)10, (byte)10, (byte)10, (short)11, (short)0);
+    private Personaje principal;
+    private Cliente cliente;
     
-    /**
-     * Creates new form MainWindow
-     */
     public MainWindow() {
         initComponents();
-        this.mapa = new JMapa(principal, (short)0);
+    }
+    
+    public MainWindow(Personaje principal, short map, Cliente cliente) {
+        initComponents();
+        this.principal = principal;
+        this.cliente = cliente;
+        this.mapa = new JMapa(principal, map);
         this.add(this.mapa, BorderLayout.CENTER);
     }
 
@@ -70,6 +74,8 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Audio.stopAll();
+        cliente.parar();
+        this.processEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_formWindowClosing
 
     /**
