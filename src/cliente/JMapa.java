@@ -30,13 +30,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 /**
@@ -218,6 +222,7 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
         if (!principal.getAtacando())
             return;
         
+        short borrar = -1;
         for (Personaje p : personajes.values()) {
             if (p == principal)
                 continue;
@@ -225,8 +230,15 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
             if (estaSiendoAtacado(p, principal)) {
                 p.setVida((byte)(p.getVida() - Personaje.getAtaque()));
                 enviaActualizacion(p);
+                
+                // Comprueba si nos lo hemos cargado
+                if (p.getVida() == 0 || p.getVida() >= 13)
+                    borrar = p.getId();
             }
         }
+        
+        if (borrar != -1)
+            personajes.remove(borrar);
     }
     
     private boolean estaSiendoAtacado(Personaje atacante, Personaje atacado) {
@@ -293,6 +305,22 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
                     this.mapaId
             );
             this.personajes.put(id, p);
+        }
+        
+        // Comprueba si han eliminado al personaje
+        if (p.getVida() >= 13 || p.getVida() == 0) {
+            personajes.remove(p.getId());
+            
+            // Comprueba si eramos nosotros
+            if (p.getId() == principal.getId()) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Has perdido...\nPuntos obtenidos:" + principal.getExp(),
+                        "Game Over",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                System.exit(0);
+            }
         }
         
         repaint();

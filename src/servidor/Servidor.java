@@ -247,7 +247,7 @@ public class Servidor {
             
             // TODO: Antes de enviar si no es de la misma ID comprobar
             // que se ha podido atacar porque estaba cerca.
-            
+                        
             // Envía la actualización a los otros
             for (Servicio serv : this.servicios.get(this.mapaId))
                 if (serv != this)
@@ -259,6 +259,12 @@ public class Servidor {
                     Crc16.calculate(mensaje.write())
             );
             this.envia(confirmacion);
+            
+            // Comprueba si nos han eliminado
+            if (mensaje.getUserId() == this.userId && (
+                    mensaje.getVida() == 0 || mensaje.getVida() >= 13)) {
+                this.servicios.get(this.mapaId).remove(this);
+            }
         }
     }
 }
