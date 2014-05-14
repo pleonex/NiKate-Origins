@@ -152,7 +152,7 @@ public class Servidor {
         private void procesaMensaje(Mensaje mensaje) {
             // DEBUG INFO
             if (this.userId != -1)
-                System.out.printf("[%x4][%s] ", this.userId, mensaje.getTipo().name());
+                System.out.printf("[%x][%s] ", this.userId, mensaje.getTipo().name());
 
             // Según el tipo de mensaje realiza una acción u otra.
             if (this.accciones.containsKey(mensaje.getTipo())) {
@@ -164,8 +164,8 @@ public class Servidor {
 
         private Map<Short, Short> creaUsuarios() {
             Map<Short, Short> usuarios = new HashMap<>();
-            usuarios.put((short)0x1F1F, (short)0xA7FE); // PASSWD: patatas
-            usuarios.put((short)0x3636, (short)0xBDC1); // PASSWD: password
+            usuarios.put((short)0x1F1F, (short)0x2EFE); // PASSWD: patatas
+            //usuarios.put((short)0x3636, (short)0xBDC1); // PASSWD: password
             return usuarios;
         }
 
@@ -204,6 +204,8 @@ public class Servidor {
         private void procesaSolicitudRegistro(RegistroSolicitud mensaje) {
             short usId = mensaje.getUsuarioId();
             short passwd = mensaje.getUsuarioPassword();
+            
+            System.out.printf("Registro: 0x%X 0x%X\n", usId, passwd);
             
             Mensaje respuesta;
             if (this.usuariosPermitidos.get(usId) != passwd) {

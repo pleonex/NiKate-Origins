@@ -17,10 +17,12 @@
 
 package cliente;
 
+import java.awt.event.WindowEvent;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -60,9 +62,9 @@ public class IniciaSesion extends javax.swing.JFrame {
         jSeparator1 = new javax.swing.JSeparator();
         txtPassword = new javax.swing.JPasswordField();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("NiKate - Origins");
-        setPreferredSize(new java.awt.Dimension(269, 260));
+        setPreferredSize(new java.awt.Dimension(269, 270));
         setResizable(false);
 
         lblUserId.setText("ID usuario:");
@@ -178,20 +180,27 @@ public class IniciaSesion extends javax.swing.JFrame {
 
             // Crea el cliente y se intenta autenticar
             Cliente cliente = new Cliente(socket, addr);
+            cliente.comenzar();
             short map = cliente.iniciaSesion(
                     this.txtUserId.getText(),
                     new String(this.txtPassword.getPassword())
             );
             
             if (map != -1) {
+                System.out.println(map);
                 // Crear personaje:
                 // TODO:
                 
                 // Empezamos a jugar
                 // TODO:
                 
-                this.setVisible(false);
+                Audio.stopAll();
+                this.processEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+            } else {
+                System.out.println("Registro inválido.");
             }
+            
+            cliente.parar();
         } catch (SocketException ex) {
             System.err.println(ex.getMessage());
         }
