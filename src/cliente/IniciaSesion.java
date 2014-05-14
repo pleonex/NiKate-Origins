@@ -22,7 +22,6 @@ import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -187,9 +186,13 @@ public class IniciaSesion extends javax.swing.JFrame {
             );
             
             if (map != -1) {
-                System.out.println(map);
                 // Crear personaje:
-                // TODO:
+                int id = Integer.parseInt(this.txtUserId.getText(), 16);
+                CreaPersonaje creaFrame = new CreaPersonaje(id, map);
+                creaFrame.setModal(true);
+                creaFrame.setVisible(true);
+                
+                Personaje personaje = creaFrame.Personaje();
                 
                 // Empezamos a jugar
                 // TODO:
