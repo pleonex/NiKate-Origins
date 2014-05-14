@@ -88,9 +88,23 @@ public class JMapa extends JPanel implements KeyListener, MouseListener,
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Pinta el fondo
         if (this.mapaImg != null)
             g.drawImage(this.mapaImg, 0, 0, this);
         
+        // DEBUG
+        // Pinta la rejilla
+        for (int i = 0; i < CeldasPorFila; i++) {
+            int coord = i * TamanioCelda;
+            
+            // Vertical
+            g.drawLine(coord, 0, coord, CeldasPorFila * TamanioCelda);
+            
+            // Horizontal
+            g.drawLine(0, coord, CeldasPorFila * TamanioCelda, coord);
+        }
+        
+        // Pinta a los personajes
         for (Personaje p : this.personajes.values())
             this.paintPersonaje(p, g);
     }
