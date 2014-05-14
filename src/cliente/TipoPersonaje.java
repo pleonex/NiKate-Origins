@@ -63,6 +63,9 @@ public enum TipoPersonaje {
 
         Image[] images = new Image[TipoPersonaje.values().length];
         for (TipoPersonaje value : TipoPersonaje.values()) {
+            if (value == TipoPersonaje.DESCONOCIDO)
+                continue;
+            
             String path = basePath + value.name() + ".png";
             if (new File(path).exists())
                 images[value.getId()] = Toolkit.getDefaultToolkit().createImage(path);

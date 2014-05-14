@@ -32,7 +32,8 @@ public class JMapa extends JPanel {
     private Personaje[] personajes;
     
     public JMapa() {
-        this.setSize(100, 100);
+        int size = CeldasPorFila * TamanioCelda;
+        this.setSize(size, size);
         this.setBackground(Color.red);
         this.personajes = new Personaje[] {
             new Personaje((short)0, TipoPersonaje.DIOS, (byte)10, (byte)10, (byte)10, (short)0, (short)0)
