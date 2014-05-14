@@ -78,7 +78,6 @@ public class MainWindow extends javax.swing.JFrame {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         Audio.stopAll();
         cliente.parar();
-        this.processEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
     }//GEN-LAST:event_formWindowClosing
 
     /**

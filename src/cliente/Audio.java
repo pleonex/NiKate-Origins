@@ -113,6 +113,7 @@ public class Audio {
         private final File clipFileLoop;
         private AudioListener listener;
         private Line line;
+        private boolean cancel = false;
         
         public PlayClipLoop(String clipPathMain, String clipPathLoop) {
             this.clipFileMain = new File(clipPathMain);
@@ -122,7 +123,8 @@ public class Audio {
         @Override
         public void run() {
             this.play(clipFileMain, false);
-            this.play(clipFileLoop, true);
+            if (!cancel)
+                this.play(clipFileLoop, true);
         }
         
         private void play(File clipFile, boolean loop) {
@@ -148,6 +150,7 @@ public class Audio {
         
         @Override
         public void interrupt() {
+            this.cancel = true;
             if (this.line != null && this.line.isOpen() && this.listener != null)
                 this.listener.update(
                         new LineEvent(this.line, Type.STOP, AudioSystem.NOT_SPECIFIED)
