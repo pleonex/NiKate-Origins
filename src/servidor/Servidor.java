@@ -147,8 +147,8 @@ public class Servidor {
 
         private Map<Short, Short> creaUsuarios() {
             Map<Short, Short> usuarios = new HashMap<>();
-            usuarios.put((short)0x1F1F, (short)0x5656); // TODO:
-            usuarios.put((short)0x3636, (short)0x5C5C); // TODO:
+            usuarios.put((short)0x1F1F, (short)0xA7FE); // PASSWD: patatas
+            usuarios.put((short)0x3636, (short)0xBDC1); // PASSWD: password
             return usuarios;
         }
 
@@ -236,7 +236,7 @@ public class Servidor {
             // Envía mensaje de confirmación
             Mensaje confirmacion = new Confirmacion(
                     mensaje.getNumSecuencia(),
-                    (short)0x00 // TODO:
+                    Crc16.calculate(mensaje.write())
             );
             confirmacion.write(this.outStream);
         }
