@@ -103,6 +103,8 @@ public class Servidor {
         private final static short MaxUsers = 8;
         private short userId = -1;
         private short mapaId = -1;
+        private Actualizacion lastUpdate;
+        private boolean primeraActual = true;
 
         public Servicio(final DatagramSocket socket, final SocketAddress address, 
                 final Map<Short, List<Servicio>> servicios) {
@@ -111,6 +113,10 @@ public class Servidor {
             this.servicios = servicios;
         }
 
+        public Actualizacion getUltimaActual() {
+            return this.lastUpdate;
+        }
+        
         public void recibe(final DatagramPacket paquete) {
             // Nunca viene mal recomprobarlo...
             if (!paquete.getSocketAddress().equals(this.address))
@@ -247,7 +253,10 @@ public class Servidor {
             
             // TODO: Antes de enviar si no es de la misma ID comprobar
             // que se ha podido atacar porque estaba cerca.
-                        
+                
+            if (this.userId == mensaje.getUserId())
+                this.lastUpdate = mensaje;
+            
             // Envía la actualización a los otros
             for (Servicio serv : this.servicios.get(this.mapaId))
                 if (serv != this)
@@ -259,6 +268,15 @@ public class Servidor {
                     Crc16.calculate(mensaje.write())
             );
             this.envia(confirmacion);
+            
+            // Si es la primera vez que actualiza, le enviamos la posición
+            // del resto de jugadores
+            if (primeraActual) {
+                primeraActual = false;
+                for (Servicio serv : this.servicios.get(this.mapaId))
+                    if (serv != this)
+                        this.envia(serv.getUltimaActual());
+            }
             
             // Comprueba si nos han eliminado
             if (mensaje.getUserId() == this.userId && (
